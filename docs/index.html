@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>lowband-clipper: cut clips from long tapes over a thin connection</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A one-button clip cutter for hour-long tapes when there is not enough bandwidth to scrub them remotely. Watch a small copy in the browser; the cuts are made from the full-quality file.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="site.css?v=1.0.0">
+</head><body>
+
+<header class="top">
+ <a class="brand" href="./"><img src="favicon.svg" alt="" width="26" height="26"><b>LOWBAND CLIPPER</b></a>
+ <nav><a href="#try">Try it</a><a href="#why">Why</a><a href="#how">How</a><a href="#run">Run it</a>
+  <a class="gh" href="https://github.com/pingywon/lowband-clipper">GitHub ↗</a></nav>
+</header>
+
+<section class="hero">
+ <p class="kicker">ONE BUTTON · ANY BROWSER · PYTHON + FFMPEG</p>
+ <h1>Cut clips out of hour-long tapes when the connection <em>can't carry them</em>.</h1>
+ <p class="lede">Watch a small copy of the tape in your browser. Press one button where a clip starts and again where it ends. The cutting happens back where the tape lives, from the full-quality file.</p>
+ <p class="cta"><a class="btn go" href="#try">● Try it right here</a><a class="btn" href="https://github.com/pingywon/lowband-clipper">Get the code</a></p>
+</section>
+
+<section id="try" class="try">
+ <div class="frame">
+  <iframe id="demo" src="demo/" title="Live demo of the lowband-clipper editor" loading="lazy" allow="autoplay; fullscreen"></iframe>
+ </div>
+ <a class="poster" href="demo/"><img src="img/poster.jpg" alt="A still from the stand-in tape" width="854" height="480"><span>● Open the live editor</span></a>
+ <p class="cap"><b>This is the real editor, running in your browser.</b> Press <kbd>▶ PLAY</kbd>, then the green button twice to cut a clip. Drag a clip up or down to reorder it. Drag along either timeline strip to scrub. Nothing is uploaded, and SUBMIT is a pretend run here because a web page cannot cut video.
+  <a href="demo/">Open it full-screen ↗</a></p>
+</section>
+
+<section id="why" class="why">
+ <div class="words">
+  <p class="label">WHY IT EXISTS</p>
+  <h2>Not enough bandwidth.</h2>
+  <p>This started with a documentary: a stack of interviews, each one a single take about an hour long, sitting on a machine at home. The job was to watch them and pull out the good moments, often from somewhere else.</p>
+  <p>The connection could not carry it. Every jump along the timeline had to download megabytes before a picture appeared, and plain playback kept freezing. A normal video editor needs the whole file in front of it; that was never going to arrive.</p>
+  <p>Two small things fixed it:</p>
+  <ul>
+   <li><b>A low copy of each tape.</b> 480p, about half a megabit per second, and <b>a full picture every second</b>. A browser can only start showing video at a full picture, so with one every ten seconds each jump drags in up to ten seconds of video first. With one every second it drags in almost nothing.</li>
+   <li><b>An editor that asks for nothing.</b> No project, no tracks, no timeline to manage. You watch, you press one button twice, the clip is on the list. The server cuts the real files.</li>
+  </ul>
+ </div>
+
+ <div class="meter" id="meter">
+  <p class="label">HOW LONG ONE JUMP TAKES</p>
+  <label for="speed">Your connection: <output id="mbps">2.0</output> Mbps</label>
+  <input id="speed" type="range" min="0" max="1000" value="354" step="1" aria-label="connection speed">
+  <div class="scale"><span style="left:0">0.5</span><span style="left:17.7%">1</span><span style="left:35.4%">2</span><span style="left:58.9%">5</span><span style="left:76.6%">10</span><span style="right:0">25 Mbps</span></div>
+
+  <div class="lane bad">
+   <div class="who"><b>Ordinary copy</b><span>720p · 1.9 Mbps · a full picture every 10 s</span></div>
+   <div class="track"><i id="barA"></i></div>
+   <div class="num"><output id="waitA">6.2</output> s</div>
+  </div>
+  <div class="lane good">
+   <div class="who"><b>Low copy</b><span>480p · 0.55 Mbps · a full picture every second</span></div>
+   <div class="track"><i id="barB"></i></div>
+   <div class="num"><output id="waitB">0.8</output> s</div>
+  </div>
+  <p class="verdict" id="verdict"></p>
+
+  <button id="jump" class="btn go">▶ Feel one jump at this speed</button>
+  <div class="race" id="race">
+   <div class="screen shown" id="scrA"><img src="img/poster.jpg" alt=""><i></i><span>ordinary copy</span></div>
+   <div class="screen shown" id="scrB"><img src="img/poster.jpg" alt=""><i></i><span>low copy</span></div>
+  </div>
+
+  <table>
+   <caption>What was measured, on a 63-minute tape through a throttled link</caption>
+   <tr><th></th><th>Ordinary copy</th><th>Low copy</th></tr>
+   <tr><td>One jump at 2 Mbps</td><td>1.5 to 8.8 s <small>(average 6.2)</small></td><td>0.7 to 0.9 s</td></tr>
+   <tr><td>One jump at 1 Mbps</td><td>2.9 to 17.6 s <small>(average 12.2)</small></td><td>1.4 to 1.7 s</td></tr>
+   <tr><td>30 s of watching at 2 Mbps</td><td>got through 11.6 s of tape</td><td>all 30 s</td></tr>
+   <tr><td>30 s of watching at 1 Mbps</td><td>got through 3.8 s of tape</td><td>all 30 s</td></tr>
+  </table>
+  <p class="fine">The slider scales those averages (about 12.3 megabits per jump against 1.6). It is a calculator, not a promise.</p>
+ </div>
+</section>
+
+<section id="how" class="how">
+ <p class="label">HOW IT WORKS</p>
+ <h2>Watch. Press twice. Submit.</h2>
+ <ol>
+  <li><img src="img/step-mark.png" alt="The editor while a clip is being marked: the button is red and counts the clip's length" loading="lazy" width="760" height="475">
+   <h3><span>1</span> Watch and mark</h3>
+   <p>Play the tape. Press the green button (or <kbd>Enter</kbd>) where a clip should start. It turns red and counts. Press it again where the clip should end.</p></li>
+  <li><img src="img/step-reorder.png" alt="A clip being dragged to a new place in the list" loading="lazy" width="760" height="475">
+   <h3><span>2</span> Your clips, in your order</h3>
+   <p>Each clip lands in a numbered list. Drag one to reorder, <kbd>▶</kbd> plays just that clip, <kbd>✕</kbd> drops it, <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes. Clips can overlap and be any length.</p></li>
+  <li><img src="img/step-submit.png" alt="The progress bar while the clips are rendered" loading="lazy" width="760" height="475">
+   <h3><span>3</span> Submit</h3>
+   <p>The server cuts every clip out of the full-quality tape with ffmpeg, as numbered files with a plain-text list of what each one is. The low copy is only ever for watching.</p></li>
+ </ol>
+</section>
+
+<section id="run" class="run">
+ <p class="label">RUN IT YOURSELF</p>
+ <h2>Python and ffmpeg. Nothing to install.</h2>
+<pre><code>git clone https://github.com/pingywon/lowband-clipper
+cd lowband-clipper
+
+<i># once per tape: make its small viewing copy</i>
+python3 clipper.py low ~/tapes/interview.mp4
+
+<i># serve the folder, then open http://127.0.0.1:8765/</i>
+python3 clipper.py ~/tapes</code></pre>
+ <p>Put a <code>.srt</code>, <code>.vtt</code> or <code>.json</code> transcript with the same name next to a tape and it becomes a searchable, clickable panel. To reach the editor from another computer, add <code>--bind 0.0.0.0</code>. There is no login, so only do that on a network you trust.</p>
+ <p><a class="btn" href="https://github.com/pingywon/lowband-clipper#readme">Read the README ↗</a></p>
+</section>
+
+<footer>
+ <span>lowband-clipper <b>v1.0.0</b></span>
+ <span>MIT licence (the code)</span>
+ <span>Stand-in footage: NASA. No endorsement by NASA is implied.</span>
+ <a href="https://github.com/pingywon/lowband-clipper">github.com/pingywon/lowband-clipper</a>
+</footer>
+
+<script src="site.js?v=1.0.0"></script>
+</body></html>

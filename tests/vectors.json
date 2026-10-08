@@ -1,0 +1,73 @@
+[
+ {"name": "mark two clips, numbered in the order marked",
+  "start": {"duration": 100, "fps": 24, "clips": []},
+  "steps": [["clip", {"in": 40, "out": 50}], ["clip", {"in": 5, "out": 9.5}]],
+  "expect": [[1, 40, 50, ""], [2, 5, 9.5, ""]]},
+
+ {"name": "marked backwards is put the right way round",
+  "start": {"duration": 100, "fps": 24, "clips": []},
+  "steps": [["clip", {"in": 30, "out": 20}]],
+  "expect": [[1, 20, 30, ""]]},
+
+ {"name": "shorter than one frame makes no clip",
+  "start": {"duration": 100, "fps": 24, "clips": []},
+  "steps": [["clip", {"in": 10, "out": 10.02}], ["clip", {"in": 10, "out": 10.05}]],
+  "expect": [[1, 10, 10.05, ""]]},
+
+ {"name": "clamped to the tape",
+  "start": {"duration": 60, "fps": 30, "clips": []},
+  "steps": [["clip", {"in": -4, "out": 12}], ["clip", {"in": 55, "out": 75}]],
+  "expect": [[1, 0, 12, ""], [2, 55, 60, ""]]},
+
+ {"name": "unknown duration is not clamped",
+  "start": {"duration": 0, "fps": 24, "clips": []},
+  "steps": [["clip", {"in": 500, "out": 510}]],
+  "expect": [[1, 500, 510, ""]]},
+
+ {"name": "rounding to the millisecond agrees on awkward values",
+  "start": {"duration": 100, "fps": 24, "clips": []},
+  "steps": [["clip", {"in": 1.0005, "out": 2.0015}], ["clip", {"in": 2.675, "out": 8.1245}],
+            ["clip", {"in": 0.0004999, "out": 3.99949999}], ["clip", {"in": 12.3456789, "out": 98.7654321}]],
+  "expect": [[1, 1.001, 2.002, ""], [2, 2.675, 8.124, ""], [3, 0, 3.999, ""], [4, 12.346, 98.765, ""]]},
+
+ {"name": "overlapping clips are allowed",
+  "start": {"duration": 100, "fps": 24, "clips": []},
+  "steps": [["clip", {"in": 10, "out": 30}], ["clip", {"in": 20, "out": 40}]],
+  "expect": [[1, 10, 30, ""], [2, 20, 40, ""]]},
+
+ {"name": "delete renumbers the rest",
+  "start": {"duration": 100, "fps": 24, "clips": [{"n": 1, "in": 1, "out": 2, "note": ""}, {"n": 2, "in": 3, "out": 4, "note": ""}, {"n": 3, "in": 5, "out": 6, "note": ""}]},
+  "steps": [["del", {"n": 2}]],
+  "expect": [[1, 1, 2, ""], [2, 5, 6, ""]]},
+
+ {"name": "delete a number that is not there changes nothing",
+  "start": {"duration": 100, "fps": 24, "clips": [{"n": 1, "in": 1, "out": 2, "note": ""}]},
+  "steps": [["del", {"n": 9}]],
+  "expect": [[1, 1, 2, ""]]},
+
+ {"name": "reorder, then the new order is the numbering",
+  "start": {"duration": 100, "fps": 24, "clips": [{"n": 1, "in": 1, "out": 2, "note": ""}, {"n": 2, "in": 3, "out": 4, "note": ""}, {"n": 3, "in": 5, "out": 6, "note": ""}]},
+  "steps": [["order", {"order": [3, 1, 2]}]],
+  "expect": [[1, 5, 6, ""], [2, 1, 2, ""], [3, 3, 4, ""]]},
+
+ {"name": "a partial or repeated order keeps every clip",
+  "start": {"duration": 100, "fps": 24, "clips": [{"n": 1, "in": 1, "out": 2, "note": ""}, {"n": 2, "in": 3, "out": 4, "note": ""}, {"n": 3, "in": 5, "out": 6, "note": ""}]},
+  "steps": [["order", {"order": [2, 2, 7]}]],
+  "expect": [[1, 3, 4, ""], [2, 1, 2, ""], [3, 5, 6, ""]]},
+
+ {"name": "edit nudges an end and sets a note",
+  "start": {"duration": 100, "fps": 24, "clips": [{"n": 1, "in": 10, "out": 20, "note": ""}]},
+  "steps": [["edit", {"n": 1, "out": 22.5, "note": "the good answer"}]],
+  "expect": [[1, 10, 22.5, "the good answer"]]},
+
+ {"name": "edit that collapses a clip removes it",
+  "start": {"duration": 100, "fps": 24, "clips": [{"n": 1, "in": 10, "out": 20, "note": ""}, {"n": 2, "in": 30, "out": 40, "note": ""}]},
+  "steps": [["edit", {"n": 1, "in": 20}]],
+  "expect": [[1, 30, 40, ""]]},
+
+ {"name": "a long session",
+  "start": {"duration": 302.357, "fps": 30, "clips": []},
+  "steps": [["clip", {"in": 38.1, "out": 50.95}], ["clip", {"in": 143.01, "out": 173.24}], ["clip", {"in": 270.14, "out": 290.79}],
+            ["order", {"order": [3, 1, 2]}], ["del", {"n": 2}], ["clip", {"in": 300, "out": 400}], ["edit", {"n": 1, "note": "closing line"}]],
+  "expect": [[1, 270.14, 290.79, "closing line"], [2, 143.01, 173.24, ""], [3, 300, 302.357, ""]]}
+]

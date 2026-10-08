@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>lowband-clipper</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="editor.css?v=__VERSION__">
+</head><body>
+<div id="bar"><a id="home" href="./"><b>LOWBAND CLIPPER</b></a>
+ <select id="pick" hidden aria-label="tape"></select>
+ <span id="lowmsg"></span>
+ <span id="saved"></span>
+ <button id="again" hidden>START OVER</button>
+ <button id="submit" disabled>SUBMIT</button></div>
+
+<div id="main">
+ <div id="vwrap"><video id="v" preload="metadata" playsinline disableremoteplayback></video></div>
+ <div class="pane" id="plines"><div class="ph">TRANSCRIPT<input id="q" placeholder="search for a moment" aria-label="search the transcript"></div>
+   <div class="scroll" id="lines"></div></div>
+ <div class="pane" id="pclips"><div class="ph" id="chead">CLIPS</div><div class="scroll" id="clips"></div></div>
+</div>
+
+<div id="act">
+ <button id="mark">●  START CLIP HERE</button>
+ <span id="hint"></span>
+ <span id="clock"></span>
+</div>
+
+<div id="trans">
+ <button data-nudge="-10">◀◀ 10s</button><button data-nudge="-5">◀ 5s</button><button data-nudge="-1">◀ 1s</button>
+ <button data-nudge="-f" title="one frame back">◀❙</button><button id="play">▶ PLAY</button><button data-nudge="f" title="one frame on">❙▶</button>
+ <button data-nudge="1">1s ▶</button><button data-nudge="5">5s ▶</button><button data-nudge="10">10s ▶▶</button>
+ <span class="gap"></span>
+ <button data-rate="0.5">.5×</button><button data-rate="1" class="on">1×</button>
+ <button data-rate="2">2×</button><button data-rate="4">4×</button>
+</div>
+
+<div id="tl"><canvas id="ov"></canvas><canvas id="det"></canvas></div>
+<div id="keys"><span class="k">enter = start / end a clip &nbsp;·&nbsp; esc = throw away the one you're marking &nbsp;·&nbsp; space = play &nbsp;·&nbsp; ← → = 1s (shift 10s, alt 5s) &nbsp;·&nbsp; , . = one frame &nbsp;·&nbsp; ctrl+z = undo</span><span id="ver">v__VERSION__</span></div>
+
+<div id="job"><span id="jt"></span><span class="bar"><i id="jb"></i></span><span id="jl"></span>
+ <button id="go">RENDER</button><button id="no">CANCEL</button><button id="jx" title="hide this bar">✕</button></div>
+
+__BACKEND__
+<script src="editor.js?v=__VERSION__"></script>
+</body></html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>lowband-clipper</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="editor.css?v=__VERSION__">
+</head><body class="picker">
+<h1>LOWBAND CLIPPER <span>pick a tape</span></h1>
+<div id="cards"></div>
+<p class="foot">lowband-clipper v__VERSION__</p>
+<script>
+(function () {
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function dur(s) {
+    s = Math.floor(s || 0);
+    var m = String(Math.floor(s % 3600 / 60)), x = String(s % 60).padStart(2, '0');
+    return s >= 3600 ? Math.floor(s / 3600) + ':' + m.padStart(2, '0') + ':' + x : m + ':' + x;
+  }
+  function card(t) {
+    var p = ['<p>' + dur(t.duration) + '</p>',
+             t.clips ? '<p>' + t.clips + ' clip' + (t.clips === 1 ? '' : 's') + ' cut &middot; ' + dur(t.total) + '</p>' : '<p>nothing cut yet</p>'];
+    if (t.job === 'running') p.push('<p class="rdy">rendering&hellip;</p>');
+    else if (t.submitted) p.push('<p class="rdy">submitted &#10003; ' + esc(t.submitted.slice(0, 16).replace('T', ' ')) + '</p>');
+    if (!t.low) p.push('<p class="warn">no low copy yet</p>');
+    return '<a class="card" href="editor.html?tape=' + encodeURIComponent(t.id) + '"><h2>' + esc(t.name) + '</h2>' + p.join('') + '</a>';
+  }
+  fetch('api/tapes', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) {
+    document.getElementById('cards').innerHTML = d.tapes.map(card).join('') ||
+      '<p id="empty">No video files in this folder yet.<br>Put a tape in it and reload. For remote viewing, make its small copy first:<br><code>python3 clipper.py low your-tape.mp4</code></p>';
+  }, function () {
+    document.getElementById('cards').innerHTML = '<p id="empty">Could not reach the server.</p>';
+  });
+})();
+</script>
+</body></html>
