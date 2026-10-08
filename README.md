@@ -6,7 +6,7 @@ Watch a small copy of the tape in your browser. Press one button where a clip st
 
 ### [▶ Try the live editor in your browser](https://pingywon.github.io/lowband-clipper/)
 
-Nothing to install: mark clips, drag them into a new order, scrub the timeline. Current release: <!-- version -->**v1.0.0**<!-- /version -->
+Nothing to install: mark clips, drag them into a new order, scrub the timeline. Current release: <!-- version -->**v1.0.1**<!-- /version -->
 
 ![Marking a clip: the green button turns red and counts, a second press puts the clip on the list](docs/img/marking.gif)
 

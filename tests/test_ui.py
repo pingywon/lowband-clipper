@@ -2,8 +2,13 @@
 
 Serves docs/ the way GitHub Pages does and drives headless Chromium with real mouse, keyboard
 and touch events. Skipped when no Chromium is installed. Run tools/build_site.py first.
+
+To run the same checks against a page that is already published:
+
+    CLIPPER_PAGE_URL=https://pingywon.github.io/lowband-clipper/ python3 -m unittest tests/test_ui.py
 """
 import json
+import os
 import shutil
 import sys
 import threading
@@ -27,21 +32,25 @@ class Page(unittest.TestCase):
     def setUpClass(cls):
         if not HAVE_BROWSER:
             raise unittest.SkipTest("no Chromium on the PATH")
-        cls.srv = preview.make_server("127.0.0.1", 0)
-        threading.Thread(target=cls.srv.serve_forever, daemon=True).start()
-        cls.base = "http://127.0.0.1:%d%s" % (cls.srv.server_address[1], preview.PREFIX)
+        cls.srv = None
+        cls.base = os.environ.get("CLIPPER_PAGE_URL", "")
+        if not cls.base:
+            cls.srv = preview.make_server("127.0.0.1", 0)
+            threading.Thread(target=cls.srv.serve_forever, daemon=True).start()
+            cls.base = "http://127.0.0.1:%d%s" % (cls.srv.server_address[1], preview.PREFIX)
         cls.b = cdp.Browser(*cls.size, touch=cls.touch)
 
     @classmethod
     def tearDownClass(cls):
         cls.b.close()
-        cls.srv.shutdown()
-        cls.srv.server_close()
+        if cls.srv:
+            cls.srv.shutdown()
+            cls.srv.server_close()
 
     # ---- helpers
     def demo(self, fresh=True):
         b = self.b
-        b.goto(self.base + "demo/")
+        b.goto(self.base + "demo/index.html")
         b.wait("window.__clipper && document.getElementById('v').readyState >= 1", what="the demo")
         if fresh:
             b.js("document.getElementById('again').click()")
@@ -198,7 +207,7 @@ class Desktop(Page):
 
     def test_project_page(self):
         b = self.b
-        b.goto(self.base)
+        b.goto(self.base + "index.html")
         self.assertEqual(self.sideways(), 0)
         self.assertIn("v" + (ROOT / "VERSION").read_text().strip(), b.js("document.querySelector('footer').textContent"))
         b.js("[].forEach.call(document.images, function(i){i.loading='eager';})")      # do not wait to be scrolled to
@@ -253,7 +262,7 @@ class Phone(Page):
         self.assertAlmostEqual(self.cur(), d * 0.8, delta=d * 0.02)
 
     def test_project_page_fits(self):
-        self.b.goto(self.base)
+        self.b.goto(self.base + "index.html")
         self.assertEqual(self.sideways(), 0)
         self.assertEqual(self.b.js("getComputedStyle(document.querySelector('.frame')).display"), "none")
         self.assertEqual(self.b.js("getComputedStyle(document.querySelector('.poster')).display"), "block")

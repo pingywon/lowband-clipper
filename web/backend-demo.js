@@ -51,7 +51,7 @@ function pretendRender(cl) {
 window.Backend = {
   demo: true,
   videoURL: '',
-  home: { href: '../', target: '_top' },
+  home: { href: '../index.html', target: '_top' },
   state: function () {
     return ready.then(function (seed) {
       return { id: seed.id, name: seed.name, version: seed.version, cutlist: copy(D.cutlist), envelope: seed.envelope,
